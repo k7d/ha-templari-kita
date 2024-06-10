@@ -1,0 +1,12 @@
+{
+  "domain": "templari_kita",
+  "name": "Templari Kita",
+  "documentation": "",
+  "integration_type": "hub",
+  "requirements": ["pymodbus==3.6.8"],
+  "config_flow": true,
+  "codeowners": ["@k7d"],
+  "iot_class": "local_polling",
+  "loggers": ["templari_kita"],
+  "version": "0.0.42"
+}

@@ -1,0 +1,14 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "host": "Host IP address",
+          "port": "Port"
+        },
+        "title": "Configure Templari Kita heat pump",
+        "description": "Please provide the IP address and port of the Modbus TCP bridge that is connected to the Templari Kita heat pump."
+      }
+    }
+  }
+}
