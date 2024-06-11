@@ -45,6 +45,7 @@ SENSOR_COMPRESSOR_SPEED = 18
 SENSOR_COOLING_SETPOINT = 65
 SENSOR_HEATING_SETPOINT = 66
 SENSOR_HOT_WATER_SETPOINT = 67
+SENSOR_HEATING_COOLING_SETPOINT = 68
 SENSOR_EEV = 70
 SENSOR_INJ = 72
 SENSOR_TJ = 73
@@ -56,7 +57,7 @@ class KitaSensorEntityDescription(SensorEntityDescription):
     multiplier: float | None = None
 
 
-SENSOR_TYPES = (
+SENSOR_TYPES = [
     KitaSensorEntityDescription(
         key=SENSOR_BUFFER_TANK_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
@@ -206,6 +207,14 @@ SENSOR_TYPES = (
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
+        key=SENSOR_HEATING_COOLING_SETPOINT,
+        device_class=SensorDeviceClass.TEMPERATURE,
+        state_class=SensorStateClass.MEASUREMENT,
+        name="Heating/cooling setpoint",
+        native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        multiplier=0.1,
+    ),
+    KitaSensorEntityDescription(
         key=SENSOR_HOT_WATER_SETPOINT,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
@@ -245,8 +254,16 @@ SENSOR_TYPES = (
         name="Energy consumption",
         native_unit_of_measurement=UnitOfPower.WATT,
     ),
-)
+]
 
+for i in [16, 17] + list(range(19, 65)):
+    SENSOR_TYPES.append(
+        KitaSensorEntityDescription(
+            key=i,
+            name=f"R{i}",
+            state_class=SensorStateClass.MEASUREMENT,
+        )
+    )
 
 async def async_setup_entry(
         hass: HomeAssistant,
