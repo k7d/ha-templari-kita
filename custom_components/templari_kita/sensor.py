@@ -262,6 +262,8 @@ async def async_setup_entry(
 
     async_add_entities(sensors, True)
 
+def get_2comp(value):
+    return value-2**16 if value & 2**15 else value
 
 class KitaSensor(SensorEntity):
     entity_description: KitaSensorEntityDescription
@@ -285,6 +287,7 @@ class KitaSensor(SensorEntity):
     async def async_update(self) -> None:
         descr = self.entity_description
         value = await modbus.read_register(self._client, descr.key)
+        value = get_2comp(value) # handle negative values
         if descr.multiplier is not None:
             value *= descr.multiplier
 
