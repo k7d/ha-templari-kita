@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from datetime import timedelta
+
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
+from .coordinator import KitaCoordinator
 from . import modbus
+
+from homeassistant.core import callback
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -272,27 +278,32 @@ async def async_setup_entry(
 ) -> None:
     client = hass.data[const.DOMAIN][config_entry.entry_id]
 
+    coordinator = KitaCoordinator(hass, client)
+    # await coordinator.async_config_entry_first_refresh()
+
     sensors = [
-        KitaSensor(client=client, config_entry=config_entry, description=description)
+        KitaSensor(hass=hass, coordinator=coordinator, config_entry=config_entry, description=description)
         for description in SENSOR_TYPES
     ]
 
     async_add_entities(sensors, True)
 
+
 def get_2comp(value):
     return value-2**16 if value & 2**15 else value
 
-class KitaSensor(SensorEntity):
+
+class KitaSensor(CoordinatorEntity, SensorEntity):
     entity_description: KitaSensorEntityDescription
 
     def __init__(
             self,
-            client: AsyncModbusTcpClient,
             hass: HomeAssistant,
+            coordinator: KitaCoordinator,
             config_entry: ConfigEntry,
             description: KitaSensorEntityDescription,
     ) -> None:
-        self._client = client
+        super().__init__(coordinator)
         self.entity_description = description
         self._attr_unique_id = f"{description.key}"
         self.entity_id = generate_entity_id("sensor.{}", f"heat-pump-{description.name}", hass=hass)
@@ -303,18 +314,16 @@ class KitaSensor(SensorEntity):
             model=const.MODEL,
         )
 
-    async def async_update(self) -> None:
+    @callback
+    def _handle_coordinator_update(self) -> None:
         descr = self.entity_description
-        value = await modbus.read_register(self._client, descr.key)
-        value = get_2comp(value) # handle negative values
+        value = self.coordinator.data[descr.key]
+        if value is None:
+            self._attr_available = False
+            return
+        self._attr_available = True
+        value = get_2comp(value)  # handle negative values
         if descr.multiplier is not None:
             value *= descr.multiplier
-
-        _LOGGER.debug(
-            "Handle update for sensor %s (%d): %s",
-            self.entity_description.name,
-            self.entity_description.key,
-            value,
-        )
-
         self._attr_native_value = value
+        self.async_write_ha_state()
