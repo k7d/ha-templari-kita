@@ -262,7 +262,8 @@ SENSOR_TYPES = [
     ),
 ]
 
-for i in [1, 16, 17] + list(range(19, 65)):
+
+for i in [1, 31, 32, 33, 41, 42, 56, 69, 71] + list(range(74, 234)) + list(range(235, 1280)):
     SENSOR_TYPES.append(
         KitaSensorEntityDescription(
             key=i,
