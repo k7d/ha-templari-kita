@@ -20,7 +20,7 @@ UnitOfPower,
     PERCENTAGE,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity import DeviceInfo, EntityCategory, generate_entity_id
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from pymodbus.client import AsyncModbusTcpClient
 from . import const
@@ -288,12 +288,14 @@ class KitaSensor(SensorEntity):
     def __init__(
             self,
             client: AsyncModbusTcpClient,
+            hass: HomeAssistant,
             config_entry: ConfigEntry,
             description: KitaSensorEntityDescription,
     ) -> None:
         self._client = client
         self.entity_description = description
-        self._attr_unique_id = f"{const.DOMAIN}-{description.key}"
+        self._attr_unique_id = f"{description.key}"
+        self.entity_id = generate_entity_id("sensor.{}", f"heat-pump-{description.name}", hass=hass)
         self._attr_device_info = DeviceInfo(
             identifiers={(const.DOMAIN, "heat-pump")},
             name=f"Heat pump",
