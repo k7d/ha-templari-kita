@@ -298,9 +298,55 @@ async def async_setup_entry(
     sensors = [
         KitaSensor(hass=hass, coordinator=coordinator, config_entry=config_entry, description=description)
         for description in SENSOR_TYPES
+    ] + [
+        KitaActiveSensor(
+            hass=hass,
+            coordinator=coordinator,
+            config_entry=config_entry,
+            key="hp-inlet-temp-hc",
+            name="Heat pump inlet temperature (heating/cooling)",
+            track_modes={1},
+            reg_addr=REG_ADDR_HP_INLET_TEMP,
+        ),
+        KitaActiveSensor(
+            hass=hass,
+            coordinator=coordinator,
+            config_entry=config_entry,
+            key="hp-outlet-temp-hc",
+            name="Heat pump outlet temperature (heating/cooling)",
+            track_modes={1},
+            reg_addr=REG_ADDR_HP_OUTLET_TEMP,
+        ),
+        KitaActiveSensor(
+            hass=hass,
+            coordinator=coordinator,
+            config_entry=config_entry,
+            key="hp-inlet-temp-dhw",
+            name="Heat pump inlet temperature (hot water)",
+            track_modes={2, 3},
+            reg_addr=REG_ADDR_HP_INLET_TEMP,
+        ),
+        KitaActiveSensor(
+            hass=hass,
+            coordinator=coordinator,
+            config_entry=config_entry,
+            key="hp-outlet-temp-dhw",
+            name="Heat pump outlet temperature (hot water)",
+            track_modes={2, 3},
+            reg_addr=REG_ADDR_HP_OUTLET_TEMP,
+        ),
     ]
 
     async_add_entities(sensors, True)
+
+
+def create_device_info():
+    return DeviceInfo(
+        identifiers={(const.DOMAIN, "heat-pump")},
+        name=f"Heat pump",
+        manufacturer=const.MANUFACTURER,
+        model=const.MODEL,
+    )
 
 
 def get_2comp(value):
@@ -321,12 +367,7 @@ class KitaSensor(CoordinatorEntity, SensorEntity):
         self.entity_description = description
         self._attr_unique_id = f"{description.key}"
         self.entity_id = generate_entity_id("sensor.{}", f"heat-pump-{description.name}", hass=hass)
-        self._attr_device_info = DeviceInfo(
-            identifiers={(const.DOMAIN, "heat-pump")},
-            name=f"Heat pump",
-            manufacturer=const.MANUFACTURER,
-            model=const.MODEL,
-        )
+        self._attr_device_info = create_device_info()
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -341,3 +382,49 @@ class KitaSensor(CoordinatorEntity, SensorEntity):
             value *= descr.multiplier
         self._attr_native_value = value
         self.async_write_ha_state()
+
+
+class KitaActiveSensor(CoordinatorEntity, SensorEntity):
+    def __init__(
+            self,
+            hass: HomeAssistant,
+            coordinator: KitaCoordinator,
+            config_entry: ConfigEntry,
+            key: str,
+            name: str,
+            track_modes: set,
+            reg_addr: int,
+
+    ) -> None:
+        super().__init__(coordinator)
+        self.track_modes = track_modes
+        self.reg_addr = reg_addr
+        description = SensorEntityDescription(
+            key=key,
+            device_class=SensorDeviceClass.TEMPERATURE,
+            state_class=SensorStateClass.MEASUREMENT,
+            name=name,
+            native_unit_of_measurement=UnitOfTemperature.CELSIUS,
+        )
+        self.entity_description = description
+        self._attr_unique_id = f"{description.key}"
+        self.entity_id = generate_entity_id("sensor.{}", f"heat-pump-{description.name}", hass=hass)
+        self._attr_device_info = create_device_info()
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        descr = self.entity_description
+        mode = self.coordinator.data[REG_ADDR_MODE]
+        if mode in self.track_modes:
+            value = self.coordinator.data[self.reg_addr]
+            if value is None:
+                self._attr_available = False
+                return
+            self._attr_available = True
+            value = get_2comp(value)
+            value *= 0.1
+            self._attr_native_value = value
+            self.async_write_ha_state()
+        else:
+            self._attr_native_value = None
+            self.async_write_ha_state()
