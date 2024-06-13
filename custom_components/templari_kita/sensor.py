@@ -21,7 +21,7 @@ from homeassistant.const import (
     UnitOfTemperature,
     UnitOfVolumeFlowRate,
     UnitOfPressure,
-UnitOfPower,
+    UnitOfPower,
     REVOLUTIONS_PER_MINUTE,
     PERCENTAGE,
 )
@@ -33,30 +33,37 @@ from . import const
 
 _LOGGER = logging.getLogger(__name__)
 
-SENSOR_BUFFER_TANK_TEMP = 2
-SENSOR_HOT_WATER_TEMP = 3
-SEONSOR_HP_INLET_TEMP = 4
-SENSOR_FLOW = 5
-SENSOR_COMPRESSOR_HEAD_TEMP = 6
-SENSOR_HP_OUTLET_TEMP = 7
-SENSOR_EXTERNAL_TEMP = 8
-SENSOR_DRAIN_TEMP = 9
-SENSOR_SUCTION_TEMP = 10
-SENSOR_HIGH_PRESSURE = 11
-SENSOR_LOW_PRESSURE = 12
-SENSOR_EVAPORATION = 13
-SENSOR_CONDENSATION = 14
-SENSOR_SH = 15
-SENSOR_COMPRESSOR_SPEED = 18
-SENSOR_COOLING_SETPOINT = 65
-SENSOR_HEATING_SETPOINT = 66
-SENSOR_HOT_WATER_SETPOINT = 67
-SENSOR_HEATING_COOLING_SETPOINT = 68
-SENSOR_EEV = 70
-SENSOR_INJ = 72
-SENSOR_TJ = 73
-SENSOR_ENERGY_CONSUMPTION = 234
+REG_ADDR_BUFFER_TANK_TEMP = 2
+REG_ADDR_HOT_WATER_TEMP = 3
+REG_ADDR_HP_INLET_TEMP = 4
+REG_ADDR_FLOW = 5
+REG_ADDR_COMPRESSOR_HEAD_TEMP = 6
+REG_ADDR_HP_OUTLET_TEMP = 7
+REG_ADDR_EXTERNAL_TEMP = 8
+REG_ADDR_DRAIN_TEMP = 9
+REG_ADDR_SUCTION_TEMP = 10
+REG_ADDR_HIGH_PRESSURE = 11
+REG_ADDR_LOW_PRESSURE = 12
+REG_ADDR_EVAPORATION = 13
+REG_ADDR_CONDENSATION = 14
+REG_ADDR_SH = 15
+REG_ADDR_COMPRESSOR_SPEED = 18
+REG_ADDR_COOLING_SETPOINT = 65
+REG_ADDR_HEATING_SETPOINT = 66
+REG_ADDR_HOT_WATER_SETPOINT = 67
+REG_ADDR_HEATING_COOLING_SETPOINT = 68
+REG_ADDR_EEV = 70
+REG_ADDR_INJ = 72
+REG_ADDR_TJ = 73
+REG_ADDR_ENERGY_CONSUMPTION = 234
+REG_ADDR_MODE = 1081
 
+REG_RANGES = [
+    (REG_ADDR_BUFFER_TANK_TEMP,REG_ADDR_COMPRESSOR_SPEED),
+    (REG_ADDR_COOLING_SETPOINT,REG_ADDR_TJ),
+    (REG_ADDR_ENERGY_CONSUMPTION,REG_ADDR_ENERGY_CONSUMPTION),
+    (REG_ADDR_MODE,REG_ADDR_MODE),
+]
 
 @dataclass
 class KitaSensorEntityDescription(SensorEntityDescription):
@@ -65,7 +72,7 @@ class KitaSensorEntityDescription(SensorEntityDescription):
 
 SENSOR_TYPES = [
     KitaSensorEntityDescription(
-        key=SENSOR_BUFFER_TANK_TEMP,
+        key=REG_ADDR_BUFFER_TANK_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Heating/cooling buffer tank temperature",
@@ -73,7 +80,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HOT_WATER_TEMP,
+        key=REG_ADDR_HOT_WATER_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Hot water temperature",
@@ -81,7 +88,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SEONSOR_HP_INLET_TEMP,
+        key=REG_ADDR_HP_INLET_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Heat pump inlet temperature",
@@ -90,7 +97,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_FLOW,
+        key=REG_ADDR_FLOW,
         device_class=SensorDeviceClass.VOLUME_FLOW_RATE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Flow",
@@ -100,7 +107,7 @@ SENSOR_TYPES = [
         icon="mdi:pipe",
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_COMPRESSOR_HEAD_TEMP,
+        key=REG_ADDR_COMPRESSOR_HEAD_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Compressor head temperature",
@@ -109,7 +116,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HP_OUTLET_TEMP,
+        key=REG_ADDR_HP_OUTLET_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Heat pump outlet temperature",
@@ -117,7 +124,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_EXTERNAL_TEMP,
+        key=REG_ADDR_EXTERNAL_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="External temperature",
@@ -125,7 +132,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_DRAIN_TEMP,
+        key=REG_ADDR_DRAIN_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Drain temperature",
@@ -134,7 +141,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_SUCTION_TEMP,
+        key=REG_ADDR_SUCTION_TEMP,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Suction temperature",
@@ -143,7 +150,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HIGH_PRESSURE,
+        key=REG_ADDR_HIGH_PRESSURE,
         device_class=SensorDeviceClass.PRESSURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="High pressure",
@@ -152,7 +159,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_LOW_PRESSURE,
+        key=REG_ADDR_LOW_PRESSURE,
         device_class=SensorDeviceClass.PRESSURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Low pressure",
@@ -161,7 +168,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_EVAPORATION,
+        key=REG_ADDR_EVAPORATION,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Evaporation",
@@ -170,7 +177,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_CONDENSATION,
+        key=REG_ADDR_CONDENSATION,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Condensation",
@@ -179,7 +186,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_SH,
+        key=REG_ADDR_SH,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="SH",
@@ -188,16 +195,16 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_COMPRESSOR_SPEED,
+        key=REG_ADDR_COMPRESSOR_SPEED,
         state_class=SensorStateClass.MEASUREMENT,
         name="Compressor speed",
         native_unit_of_measurement=REVOLUTIONS_PER_MINUTE,
-        multiplier=6, # RPS * 10
+        multiplier=6,  # RPS * 10
         icon="mdi:fan",
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_COOLING_SETPOINT,
+        key=REG_ADDR_COOLING_SETPOINT,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Cooling setpoint",
@@ -205,7 +212,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HEATING_SETPOINT,
+        key=REG_ADDR_HEATING_SETPOINT,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Heating setpoint",
@@ -213,7 +220,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HEATING_COOLING_SETPOINT,
+        key=REG_ADDR_HEATING_COOLING_SETPOINT,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Heating/cooling setpoint",
@@ -221,7 +228,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_HOT_WATER_SETPOINT,
+        key=REG_ADDR_HOT_WATER_SETPOINT,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="Hot water setpoint",
@@ -229,7 +236,7 @@ SENSOR_TYPES = [
         multiplier=0.1,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_EEV,
+        key=REG_ADDR_EEV,
         state_class=SensorStateClass.MEASUREMENT,
         name="EEV",
         native_unit_of_measurement=PERCENTAGE,
@@ -237,7 +244,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_INJ,
+        key=REG_ADDR_INJ,
         state_class=SensorStateClass.MEASUREMENT,
         name="Injection",
         native_unit_of_measurement=PERCENTAGE,
@@ -245,7 +252,7 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_TJ,
+        key=REG_ADDR_TJ,
         device_class=SensorDeviceClass.TEMPERATURE,
         state_class=SensorStateClass.MEASUREMENT,
         name="TJ",
@@ -254,23 +261,29 @@ SENSOR_TYPES = [
         entity_category=EntityCategory.DIAGNOSTIC,
     ),
     KitaSensorEntityDescription(
-        key=SENSOR_ENERGY_CONSUMPTION,
+        key=REG_ADDR_ENERGY_CONSUMPTION,
         device_class=SensorDeviceClass.POWER,
         state_class=SensorStateClass.MEASUREMENT,
         name="Energy consumption",
         native_unit_of_measurement=UnitOfPower.WATT,
     ),
+    KitaSensorEntityDescription(
+        key=REG_ADDR_MODE,
+        name="Mode",
+        device_class=SensorDeviceClass.ENUM,
+        state_class=SensorStateClass.MEASUREMENT,
+    )
 ]
 
 
-for i in [1, 31, 32, 33, 41, 42, 56, 69, 71] + list(range(74, 234)) + list(range(235, 1280)):
-    SENSOR_TYPES.append(
-        KitaSensorEntityDescription(
-            key=i,
-            name=f"R{i}",
-            state_class=SensorStateClass.MEASUREMENT,
-        )
-    )
+# for i in [1, 31, 32, 33, 41, 42, 56, 69, 71] + list(range(74, 234)) + list(range(235, 1280)):
+#     REG_ADDR_TYPES.append(
+#         KitaSensorEntityDescription(
+#             key=i,
+#             name=f"R{i}",
+#             state_class=SensorStateClass.MEASUREMENT,
+#         )
+#     )
 
 async def async_setup_entry(
         hass: HomeAssistant,
@@ -279,7 +292,7 @@ async def async_setup_entry(
 ) -> None:
     client = hass.data[const.DOMAIN][config_entry.entry_id]
 
-    coordinator = KitaCoordinator(hass, client)
+    coordinator = KitaCoordinator(hass, client, REG_RANGES)
     # await coordinator.async_config_entry_first_refresh()
 
     sensors = [
@@ -291,7 +304,7 @@ async def async_setup_entry(
 
 
 def get_2comp(value):
-    return value-2**16 if value & 2**15 else value
+    return value - 2 ** 16 if value & 2 ** 15 else value
 
 
 class KitaSensor(CoordinatorEntity, SensorEntity):
