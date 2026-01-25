@@ -3,10 +3,10 @@
   "name": "Templari Kita",
   "documentation": "",
   "integration_type": "hub",
-  "requirements": ["pymodbus==3.6.8"],
+  "requirements": ["pymodbus==3.11.2"],
   "config_flow": true,
   "codeowners": ["@k7d"],
   "iot_class": "local_polling",
   "loggers": ["templari_kita"],
-  "version": "0.0.42"
+  "version": "0.0.43"
 }
