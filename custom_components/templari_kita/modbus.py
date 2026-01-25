@@ -12,7 +12,7 @@ class ClientException(Exception):
 
 
 async def read_registers(client, address, count) -> [int]:
-    rr = await client.read_input_registers(address, count, slave=1)
+    rr = await client.read_input_registers(address, count)
     if rr.isError() or isinstance(rr, ExceptionResponse):
         _LOGGER.warning(f"Modbus error while reading register {address} ({rr})")
         return None
@@ -31,7 +31,7 @@ async def read_registers_chunked(client, from_adr, to_adr, chunk_size=32):
     starttime = time.time()
     errors = 0
     for adr in range(from_adr, to_adr, chunk_size):
-        rr = await client.read_input_registers(adr, chunk_size, slave=1)
+        rr = await client.read_input_registers(adr, chunk_size)
         error = False
         if rr.isError():
             error = True
@@ -55,7 +55,7 @@ async def read_registers_chunked(client, from_adr, to_adr, chunk_size=32):
 
 
 async def connect(host: str, port: int) -> AsyncModbusTcpClient:
-    client = AsyncModbusTcpClient(host=host, port=port)
+    client = AsyncModbusTcpClient(host=host, port=port, slave=1)
     await client.connect()
     if not client.connected:
         raise ClientException("invalid_host")
