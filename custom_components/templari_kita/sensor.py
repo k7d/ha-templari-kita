@@ -271,7 +271,6 @@ SENSOR_TYPES = [
         key=REG_ADDR_MODE,
         name="Mode",
         device_class=SensorDeviceClass.ENUM,
-        state_class=SensorStateClass.MEASUREMENT,
     )
 ]
 

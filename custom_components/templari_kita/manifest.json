@@ -8,5 +8,5 @@
   "codeowners": ["@k7d"],
   "iot_class": "local_polling",
   "loggers": ["templari_kita"],
-  "version": "0.0.45"
+  "version": "0.0.46"
 }
