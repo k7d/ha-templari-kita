@@ -289,10 +289,7 @@ async def async_setup_entry(
         config_entry: ConfigEntry,
         async_add_entities: AddEntitiesCallback,
 ) -> None:
-    client = hass.data[const.DOMAIN][config_entry.entry_id]
-
-    coordinator = KitaCoordinator(hass, client, REG_RANGES)
-    # await coordinator.async_config_entry_first_refresh()
+    coordinator = hass.data[const.DOMAIN][config_entry.entry_id]["coordinator"]
 
     sensors = [
         KitaSensor(hass=hass, coordinator=coordinator, config_entry=config_entry, description=description)

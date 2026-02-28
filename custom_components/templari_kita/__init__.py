@@ -1,16 +1,19 @@
-"""Support to monitor Templari Kita heat pump via Modbus TCP bridge."""
+"""Support to monitor and control Templari Kita heat pump via Modbus TCP + VNC."""
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, CONF_PORT, EVENT_HOMEASSISTANT_STOP, Platform
 from homeassistant.exceptions import ConfigEntryError
 from . import modbus
+from .coordinator import KitaCoordinator
+from .sensor import REG_RANGES
 
 import logging
 from .const import DOMAIN
 
 PLATFORMS: list[Platform] = [
     Platform.SENSOR,
+    Platform.NUMBER,
 ]
 
 _LOGGER = logging.getLogger(__name__)
@@ -24,7 +27,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         _LOGGER.error(f"Failed to connect to {entry.data[CONF_HOST]}:{entry.data[CONF_PORT]}")
         raise ConfigEntryError from e
 
-    hass.data[DOMAIN][entry.entry_id] = client
+    coordinator = KitaCoordinator(hass, client, REG_RANGES)
+
+    hass.data[DOMAIN][entry.entry_id] = {
+        "client": client,
+        "coordinator": coordinator,
+    }
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
@@ -40,8 +48,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok := await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        client = hass.data[DOMAIN][entry.entry_id]
-        client.close()
+        data = hass.data[DOMAIN][entry.entry_id]
+        data["client"].close()
         hass.data[DOMAIN].pop(entry.entry_id)
 
     return unload_ok

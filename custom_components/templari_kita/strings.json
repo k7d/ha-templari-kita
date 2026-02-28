@@ -3,11 +3,12 @@
     "step": {
       "user": {
         "data": {
-          "host": "Host IP address",
-          "port": "Port"
+          "host": "Modbus bridge IP address",
+          "port": "Modbus bridge port",
+          "hmi_host": "HMI panel IP address (for setpoint control)"
         },
         "title": "Configure Templari Kita heat pump",
-        "description": "Please provide the IP address and port of the Modbus TCP bridge that is connected to the Templari Kita heat pump."
+        "description": "Provide the Modbus TCP bridge address (for reading sensors) and the Weintek HMI panel address (for writing setpoints via VNC)."
       }
     }
   }

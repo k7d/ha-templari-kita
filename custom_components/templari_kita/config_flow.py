@@ -2,7 +2,7 @@ from pymodbus.client import AsyncModbusTcpClient
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_PORT
 from homeassistant.data_entry_flow import FlowResult
-from .const import DOMAIN
+from .const import DOMAIN, CONF_HMI_HOST, DEFAULT_HMI_HOST
 import voluptuous as vol
 from . import modbus
 from typing import Any
@@ -13,7 +13,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class KitaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-    MINOR_VERSION = 1
+    MINOR_VERSION = 2
 
     def __init__(self):
         self.client: AsyncModbusTcpClient | None = None
@@ -26,7 +26,8 @@ class KitaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
             host = user_input[CONF_HOST]
             port = user_input[CONF_PORT]
-            logging.warning(f"configured: {host}:{port}")
+            hmi_host = user_input.get(CONF_HMI_HOST, DEFAULT_HMI_HOST)
+            logging.warning(f"configured: {host}:{port}, hmi: {hmi_host}")
             if host is not None and port is not None:
                 try:
                     self.client = await modbus.connect(host, port)
@@ -36,6 +37,7 @@ class KitaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                         data={
                             CONF_HOST: host,
                             CONF_PORT: port,
+                            CONF_HMI_HOST: hmi_host,
                         },
                     )
                 except modbus.ClientException as e:
@@ -43,7 +45,8 @@ class KitaConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         return self.async_show_form(step_id=step_id, errors=errors, data_schema=vol.Schema({
             vol.Required(CONF_HOST, default="10.0.42.207"): str,
-            vol.Required(CONF_PORT, default=4196): int, # 502
+            vol.Required(CONF_PORT, default=4196): int,
+            vol.Optional(CONF_HMI_HOST, default=DEFAULT_HMI_HOST): str,
         }))
 
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
